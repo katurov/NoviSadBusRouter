@@ -8,9 +8,10 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-REDIS_HOST = os.getenv("REDIS_HOST", "192.168.42.51")
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 REDIS_QUEUE_NAME = os.getenv("REDIS_QUEUE_NAME", "bus_routes_tasks")
+
 
 _redis_client = None
 
