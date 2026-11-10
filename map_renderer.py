@@ -1,12 +1,16 @@
 import io
 import json
 import logging
+import os
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import geopandas as gpd
 import contextily as cx
 from shapely.geometry import shape, Point, LineString
+from dotenv import load_dotenv
 from routing import get_route_segment_geom, get_intermediate_stops_geom
+
+load_dotenv()
 
 # Настройка matplotlib для работы без GUI
 plt.switch_backend('Agg')
@@ -15,6 +19,20 @@ plt.switch_backend('Agg')
 ROUTE_COLORS = ['#1f77b4', '#2ca02c', '#9467bd', '#8c564b', '#e377c2', '#17becf']
 
 logger = logging.getLogger(__name__)
+
+# Настройка CARTO basemap с API ключом
+CARTO_API_KEY = os.getenv('CARTO_API_KEY')
+CARTO_ATTRIBUTION = '© OpenStreetMap contributors © CARTO'
+
+if CARTO_API_KEY:
+    CARTO_POSITRON_URL = f'https://basemaps.cartocdn.com/light_all/{{z}}/{{x}}/{{y}}.png?key={CARTO_API_KEY}'
+    logger.info("CARTO API key loaded successfully")
+else:
+    logger.warning(
+        "CARTO_API_KEY not found in environment. Map tiles will show watermarks. "
+        "Get your free API key at https://carto.com/basemaps/apikey and add it to .env"
+    )
+    CARTO_POSITRON_URL = None
 
 def render_stops_map(stops_data, user_lon, user_lat) -> io.BytesIO | None:
     """Генерирует карту с ближайшими остановками в памяти (BytesIO)."""
@@ -58,7 +76,10 @@ def render_stops_map(stops_data, user_lon, user_lat) -> io.BytesIO | None:
             )
 
         # 5. Подложка
-        cx.add_basemap(ax, source=cx.providers.CartoDB.Positron)
+        if CARTO_POSITRON_URL:
+            cx.add_basemap(ax, source=CARTO_POSITRON_URL, attribution=CARTO_ATTRIBUTION)
+        else:
+            cx.add_basemap(ax, source=cx.providers.CartoDB.Positron)
         ax.axis("off")
         
         # 6. Легенда
@@ -130,7 +151,10 @@ def render_full_route_map(route_info) -> io.BytesIO | None:
                 )
 
         # 4. Подложка
-        cx.add_basemap(ax, source=cx.providers.CartoDB.Positron)
+        if CARTO_POSITRON_URL:
+            cx.add_basemap(ax, source=CARTO_POSITRON_URL, attribution=CARTO_ATTRIBUTION)
+        else:
+            cx.add_basemap(ax, source=cx.providers.CartoDB.Positron)
         ax.axis("off")
         ax.set_title(f"Маршрут {route_info['num']}: {route_info['title']}", fontsize=12, pad=20)
         
@@ -201,7 +225,10 @@ def render_route_map(route_data) -> io.BytesIO | None:
                 walk_gdf.plot(ax=ax, linewidth=3, color="orange", linestyle="--", alpha=0.9, zorder=4)
                 legend_handles.append(mlines.Line2D([], [], color="orange", linestyle='--', linewidth=2, label=f"Переход ({route_data['walk_dist']:.0f}м)"))
 
-        cx.add_basemap(ax, source=cx.providers.CartoDB.Positron)
+        if CARTO_POSITRON_URL:
+            cx.add_basemap(ax, source=CARTO_POSITRON_URL, attribution=CARTO_ATTRIBUTION)
+        else:
+            cx.add_basemap(ax, source=cx.providers.CartoDB.Positron)
         ax.axis("off")
         ax.legend(handles=legend_handles, loc='upper left', frameon=True, shadow=True, fontsize=10)
         
