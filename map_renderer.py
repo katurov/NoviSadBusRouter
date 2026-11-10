@@ -99,7 +99,7 @@ def render_stops_map(stops_data, user_lon, user_lat) -> io.BytesIO | None:
         )
         
         buf = io.BytesIO()
-        plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0.2, dpi=150)
+        plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0.2, dpi=120)
         buf.seek(0)
         return buf
     except Exception as e:
@@ -167,7 +167,7 @@ def render_full_route_map(route_info) -> io.BytesIO | None:
         ax.legend(handles=legend_handles, loc='upper right', frameon=True, shadow=True, fontsize=10)
 
         buf = io.BytesIO()
-        plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0.1, dpi=150)
+        plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0.1, dpi=120)
         buf.seek(0)
         return buf
     except Exception as e:
@@ -240,7 +240,7 @@ def render_route_map(route_data) -> io.BytesIO | None:
             ax.set_ylim(miny - dy, maxy + dy)
 
         buf = io.BytesIO()
-        plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0.1, dpi=150)
+        plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0.1, dpi=120)
         buf.seek(0)
         return buf
     except Exception as e:
