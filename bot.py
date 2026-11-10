@@ -3,6 +3,7 @@ import logging
 import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
+from telegram.request import HTTPXRequest
 from dotenv import load_dotenv
 
 from routing import (
@@ -381,7 +382,16 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 def main() -> None:
     """Запуск бота."""
-    application = Application.builder().token(TOKEN).build()
+    # Настройка увеличенных таймаутов для больших изображений карт
+    request = HTTPXRequest(
+        read_timeout=30.0,
+        write_timeout=30.0,
+        connect_timeout=10.0,
+        pool_timeout=5.0,
+        media_write_timeout=60.0
+    )
+    
+    application = Application.builder().token(TOKEN).request(request).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("about", about_command))
